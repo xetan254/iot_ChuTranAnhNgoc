@@ -21,7 +21,6 @@ const SensorController = {
                 offset
             });
 
-            // Map lại format giống như MySQL thô để Frontend không cần sửa đổi
             const formatted = results.map(item => ({
                 id: item.id,
                 sensor_name: item.sensorInfo ? item.sensorInfo.name : 'Unknown',
@@ -44,7 +43,6 @@ const SensorController = {
         }
     },
 
-    // API Lấy dữ liệu biểu đồ (120 bản ghi gần nhất)
     getChartData: async (req, res) => {
         try {
             const results = await SensorData.findAll({
