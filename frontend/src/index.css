@@ -13,7 +13,7 @@ body { background-color: #F4F6F9; color: #333; margin: 0; }
 .logo i { font-size: 28px; }
 
 .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0 20px; }
-.nav-menu a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; color: #A09BC0; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 16px; transition: all 0.3s; }
+.nav-menu a { display: flex; align-items: center; gap: 15px; padding: 15px 20px; color: #A09BC0; text-decoration: none; font-size: 15px; font-weight: 700; border-radius: 16px; transition: all 0.3s; }
 .nav-menu a:hover { color: white; background-color: rgba(255, 255, 255, 0.05); }
 .nav-menu a.active { background-color: white; color: #2D2185; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); font-weight: 600; }
 .nav-menu a.active i { color: #2D2185; }
@@ -132,12 +132,11 @@ tbody tr:hover { background-color: #F8F9FE; }
 .b-hum { background: #E8F1FF; color: #4A90E2; }
 
 /* Phân trang */
-.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #E5E7EB; }
+.pagination { display: flex; width: 100%; align-self: stretch; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #E5E7EB; }
 .page-btn { padding: 8px 14px; border: 1px solid #E5E7EB; background: white; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; color: #555; transition: all 0.3s; display: flex; align-items: center; justify-content: center; min-width: 36px; }
 .page-btn:hover { background: #F8F9FE; color: #2D2185; border-color: #2D2185; }
 .page-btn.active { background: #2D2185; color: white; border-color: #2D2185; box-shadow: 0 4px 10px rgba(45, 33, 133, 0.2); }
 .page-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; background: #F4F6F9; }
-.page-btn.active:disabled { opacity: 1; background: #2D2185; color: white; border-color: #2D2185; }
 .page-dots { color: #888; font-weight: 600; padding: 0 5px; }
 
 

@@ -26,8 +26,8 @@ function Dashboard() {
         const statusMap = { ac: false, light: false, air: false };
         
         res.data.forEach(item => {
-          const isON = (item.action && item.action.toUpperCase() === 'ON') || 
-                       (item.status && item.status.toUpperCase() === 'ON');
+          // CHỈ KIỂM TRA STATUS THỰC TẾ (Thành công cuối cùng)
+          const isON = item.status && item.status.toUpperCase() === 'ON';
           
           if (String(item.device_id) === '1') statusMap.ac = isON;
           if (String(item.device_id) === '2') statusMap.light = isON;
@@ -87,7 +87,6 @@ function Dashboard() {
 
     try {
       // 1. Gửi lệnh điều khiển (BỎ AWAIT để không bị kẹt nếu backend treo 1 phút)
-      // Thêm timeout 5s để ngắt request nếu nó treo quá lâu
       axios.post('http://localhost:5000/api/control', {
         deviceId: deviceId, deviceCode: deviceCode, action: actionStr
       }, { timeout: 5000 }).catch(err => console.log("Lỗi POST lệnh:", err));
@@ -104,8 +103,8 @@ function Dashboard() {
         const targetDevice = res.data.find(item => String(item.device_id) === String(deviceId));
         
         if (targetDevice) {
-          const dbIsOn = (targetDevice.action && targetDevice.action.toUpperCase() === 'ON') || 
-                         (targetDevice.status && targetDevice.status.toUpperCase() === 'ON');
+          // CHỈ KIỂM TRA STATUS THỰC TẾ
+          const dbIsOn = targetDevice.status && targetDevice.status.toUpperCase() === 'ON';
           
           if (dbIsOn === newState) {
             statusChanged = true;
@@ -127,31 +126,26 @@ function Dashboard() {
         const res = await axios.get('http://localhost:5000/api/device-status');
         const targetDevice = res.data.find(item => String(item.device_id) === String(deviceId));
         
-        let latestDbState = oldState; // Mặc định về trạng thái ban đầu
+        let latestDbState = oldState; 
         if (targetDevice) {
-          // Lấy chính xác trạng thái mới nhất đang lưu trong Database (chỉ ON hoặc OFF)
-          latestDbState = (targetDevice.action && targetDevice.action.toUpperCase() === 'ON') || 
-                          (targetDevice.status && targetDevice.status.toUpperCase() === 'ON');
+          // CHỈ LẤY THEO STATUS CUỐI CÙNG
+          latestDbState = targetDevice.status && targetDevice.status.toUpperCase() === 'ON';
         }
         
-        // Cập nhật giao diện theo trạng thái thực tế của DB
         setDevices(prev => ({ ...prev, [deviceKey]: latestDbState })); 
       } catch (dbError) {
-        // Nếu API sập không lấy được thì đành lùi về oldState
         setDevices(prev => ({ ...prev, [deviceKey]: oldState })); 
       }
 
-      // Tắt loading
       setLoadingDevices(prev => ({ ...prev, [deviceKey]: false }));
       
-      // SỬ DỤNG SETTIMEOUT ĐỂ DELAY ALERT, GIÚP GIAO DIỆN CẬP NHẬT TRƯỚC
       setTimeout(() => {
         if (error.message === "TIMEOUT_10S") {
           alert("⚠️ Lệnh thất bại: Không nhận được phản hồi sau 10s. Thiết bị đã trở về trạng thái hiện tại.");
         } else {
           alert("❌ Lỗi kết nối đến máy chủ.");
         }
-      }, 400); // Trễ 100ms là đủ để React render lại UI
+      }, 400); 
     }
   };
 
