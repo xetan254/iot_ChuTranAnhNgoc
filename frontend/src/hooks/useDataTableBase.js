@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 
-/**
- * Shared base hook for managing table state (pagination, search, sort).
- * This ensures that the common frontend logic is consistent across pages.
- */
 export function useDataTableBase({ 
   initialSort = { key: 'id', direction: 'desc' }, 
   limit = 10,
@@ -22,9 +18,6 @@ export function useDataTableBase({
   useEffect(() => {
     loadData(page);
   }, [page]);
-
-  // When search/filter changes, return to the first page so stale page numbers
-  // do not leave the table on an empty page.
   useEffect(() => {
     setPage(1);
   }, [searchTerm, filterValue]);

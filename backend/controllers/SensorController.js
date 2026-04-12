@@ -3,7 +3,6 @@ const { Sequelize } = require('sequelize');
 
 // Quản lý dữ liệu cảm biến
 const SensorController = {
-    // API Lấy dữ liệu cảm biến (Phân trang)
     getSensorData: async (req, res) => {
         try {
             const limit = parseInt(req.query.limit) || 10;
