@@ -10,17 +10,16 @@ import { formatDate } from '../utils/dateUtils';
 function History() {
   const {
     data,
-    rawData,
     loading,
     page,
     setPage,
+    totalPages,
     searchTerm,
     setSearchTerm,
     filterValue,
     setFilterValue,
     sortConfig,
     handleSort,
-    limit
   } = useAction();
 
   const columns = [
@@ -68,7 +67,7 @@ function History() {
       <Pagination 
         page={page} 
         onPageChange={setPage} 
-        hasMore={rawData.length >= limit} 
+        totalPages={totalPages}
       />
     </div>
   );

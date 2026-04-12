@@ -137,6 +137,7 @@ tbody tr:hover { background-color: #F8F9FE; }
 .page-btn:hover { background: #F8F9FE; color: #2D2185; border-color: #2D2185; }
 .page-btn.active { background: #2D2185; color: white; border-color: #2D2185; box-shadow: 0 4px 10px rgba(45, 33, 133, 0.2); }
 .page-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; background: #F4F6F9; }
+.page-btn.active:disabled { opacity: 1; background: #2D2185; color: white; border-color: #2D2185; }
 .page-dots { color: #888; font-weight: 600; padding: 0 5px; }
 
 

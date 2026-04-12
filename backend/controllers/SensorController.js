@@ -9,6 +9,8 @@ const SensorController = {
             const limit = parseInt(req.query.limit) || 10;
             const offset = parseInt(req.query.offset) || 0;
 
+            const totalItems = await SensorData.count();
+
             const results = await SensorData.findAll({
                 include: [{
                     model: Sensor,
@@ -29,7 +31,14 @@ const SensorController = {
                 measured_at: item.measured_at
             }));
 
-            res.json(formatted);
+            const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+
+            res.json({
+                data: formatted,
+                totalItems,
+                totalPages,
+                currentPage: Math.floor(offset / limit) + 1
+            });
         } catch (error) {
             console.error('Lỗi lấy dữ liệu cảm biến:', error);
             res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });

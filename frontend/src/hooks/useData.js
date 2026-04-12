@@ -5,7 +5,19 @@ import { formatDate } from '../utils/dateUtils';
 export function useData() {
   const fetchFn = async (offset, limit) => {
     const response = await axios.get(`http://localhost:5000/api/sensor-data?limit=${limit}&offset=${offset}`);
-    return response.data;
+    const payload = response.data;
+
+    if (Array.isArray(payload)) {
+      return {
+        data: payload,
+        totalPages: payload.length < limit ? Math.max(1, Math.floor(offset / limit) + 1) : Math.floor(offset / limit) + 2
+      };
+    }
+
+    return {
+      data: payload.data || [],
+      totalPages: payload.totalPages || 1
+    };
   };
 
   const filterFn = (item, searchTerm, typeFilter) => {

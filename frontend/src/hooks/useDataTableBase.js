@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 /**
  * Shared base hook for managing table state (pagination, search, sort).
@@ -13,6 +13,7 @@ export function useDataTableBase({
   const [dataList, setDataList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterValue, setFilterValue] = useState('all');
   const [sortConfig, setSortConfig] = useState(initialSort);
@@ -22,12 +23,26 @@ export function useDataTableBase({
     loadData(page);
   }, [page]);
 
+  // When search/filter changes, return to the first page so stale page numbers
+  // do not leave the table on an empty page.
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, filterValue]);
+
   const loadData = async (currentPage) => {
     setLoading(true);
     try {
       const offset = (currentPage - 1) * limit;
-      const data = await fetchFn(offset, limit);
-      setDataList(data);
+      const response = await fetchFn(offset, limit);
+      const nextData = response.data || [];
+      const nextTotalPages = Math.max(1, Number(response.totalPages) || 1);
+
+      setDataList(nextData);
+      setTotalPages(nextTotalPages);
+
+      if (currentPage > nextTotalPages) {
+        setPage(nextTotalPages);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -55,6 +70,7 @@ export function useDataTableBase({
     loading,
     page,
     setPage,
+    totalPages,
     searchTerm,
     setSearchTerm,
     filterValue,
