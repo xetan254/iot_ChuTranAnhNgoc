@@ -1,68 +1,95 @@
 import React from 'react';
 
 function Pagination({ page, onPageChange, totalPages = 1 }) {
-  const safeTotalPages = Math.max(1, totalPages);
-  const visibleCount = 5;
-  const safePage = Math.min(Math.max(1, page), safeTotalPages);
-  const canGoPrev = safePage > 1;
-  const canGoNext = safePage < safeTotalPages;
+    const safeTotalPages = Math.max(1, Number(totalPages) || 1);
+    const currentPage = Math.min(Math.max(1, Number(page) || 1), safeTotalPages);
 
-  let startPage;
-  let endPage;
+    function getPages() {
+        const delta = 2; 
+        const range = [];
+        const left = Math.max(1, currentPage - delta);
+        const right = Math.min(safeTotalPages, currentPage + delta);
 
-  if (safePage <= 3) {
-    startPage = 1;
-    endPage = visibleCount;
-  } else if (safePage >= safeTotalPages - 2) {
-    endPage = safeTotalPages;
-    startPage = safeTotalPages - (visibleCount - 1);
-  } else {
-    startPage = safePage - 2;
-    endPage = safePage + 2;
-  }
+        for (let i = left; i <= right; i++) {
+            range.push(i);
+        }
 
-  const goToPage = (targetPage) => {
-    const nextPage = Math.min(Math.max(1, targetPage), safeTotalPages);
-    onPageChange(nextPage);
-  };
+        if (left > 2) range.unshift('...');
+        if (left > 1) range.unshift(1);
 
-  const pageNumbers = [];
-  for (let i = startPage; i <= endPage; i += 1) {
-    if (i <= safeTotalPages) {
-      pageNumbers.push(i);
+        if (right < safeTotalPages - 1) range.push('...');
+        if (right < safeTotalPages) range.push(safeTotalPages);
+
+        return range;
     }
-  }
 
-  return (
-    <div className="pagination" style={{ marginTop: '15px' }}>
-      {canGoPrev && (
-        <button 
-          className="page-btn" 
-          onClick={() => goToPage(safePage - 1)}
+    return (
+        <div 
+            className="pagination" 
+            style={{ 
+                marginTop: '20px', 
+                marginBottom: '20px',
+                display: 'flex', 
+                justifyContent: 'center', // Lệnh này giúp căn giữa toàn bộ thanh phân trang
+                alignItems: 'center',
+                gap: '8px',               // Tạo khoảng cách đều giữa các nút
+                flexWrap: 'wrap'          // Tránh bị tràn màn hình trên điện thoại
+            }}
         >
-          <i className="fas fa-chevron-left"></i>
-        </button>
-      )}
+            {/* Nút Previous */}
+            <button
+                className="page-btn"
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                style={{ 
+                    opacity: currentPage === 1 ? 0.4 : 1, 
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer' 
+                }}
+            >
+                <i className="fas fa-chevron-left"></i>
+            </button>
 
-      {pageNumbers.map((pageNumber) => (
-        <button
-          key={pageNumber}
-          className={`page-btn ${pageNumber === safePage ? 'active' : ''}`}
-          onClick={() => goToPage(pageNumber)}
-        >
-          {pageNumber}
-        </button>
-      ))}
+            {/* Render các trang và dấu ... */}
+            {getPages().map((p, i) =>
+                p === '...' ? (
+                    <span 
+                        key={`ellipsis-${i}`} 
+                        className="page-btn" 
+                        style={{ 
+                            background: 'transparent', 
+                            border: 'none', 
+                            color: '#888',
+                            pointerEvents: 'none',
+                            padding: '8px 4px'
+                        }}
+                    >
+                        ...
+                    </span>
+                ) : (
+                    <button
+                        key={p}
+                        onClick={() => onPageChange(p)}
+                        className={`page-btn ${p === currentPage ? 'active' : ''}`}
+                    >
+                        {p}
+                    </button>
+                )
+            )}
 
-      <button 
-        className="page-btn" 
-        disabled={!canGoNext}
-        onClick={() => goToPage(safePage + 1)}
-      >
-        <i className="fas fa-chevron-right"></i>
-      </button>
-    </div>
-  );
+            {/* Nút Next */}
+            <button
+                className="page-btn"
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === safeTotalPages}
+                style={{ 
+                    opacity: currentPage === safeTotalPages ? 0.4 : 1, 
+                    cursor: currentPage === safeTotalPages ? 'not-allowed' : 'pointer' 
+                }}
+            >
+                <i className="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    );
 }
 
 export default Pagination;

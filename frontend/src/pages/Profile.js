@@ -1,40 +1,99 @@
 import React from 'react';
 
-function Profile() {
-  return (
-    <div className="profile-grid">
-      <div className="card">
-        {/* Đường dẫn ảnh hướng về thư mục public/ của React */}
-        <img src="profile.jpg" alt="Avatar" className="avatar" />
-        <h2 className="profile-name">Chu Trần Anh Ngọc</h2>
-        <p className="profile-desc">Công nghệ Đa phương tiện<br />B22DCPT189</p>
-        <div className="contact-item"><i className="fas fa-phone"></i> 0399917084</div>
-        <div className="contact-item"><i className="fas fa-envelope"></i> NgocCTA.B22PT189@stu.ptit.edu.vn</div>
-      </div>
+function Pagination({ page, onPageChange, totalPages = 1 }) {
+    const safeTotalPages = Math.max(1, Number(totalPages) || 1);
+    const currentPage = Math.min(Math.max(1, Number(page) || 1), safeTotalPages);
 
-      <div className="card" style={{ textAlign: 'left' }}>
-        <h3 style={{ color: '#2D2185', marginBottom: '20px', fontSize: '18px' }}>Liên Kết</h3>
-        <div className="links-grid">
-          <a href="#" className="link-item">
-            <div className="link-icon" style={{ background: '#FF5A5A' }}><i className="fas fa-file-pdf"></i></div>
-            <div><span className="link-text">Báo Cáo Đồ Án</span><span className="link-desc">Tải file PDF</span></div>
-          </a>
-          <a href="#" className="link-item">
-            <div className="link-icon" style={{ background: '#333' }}><i className="fab fa-github"></i></div>
-            <div><span className="link-text">GitHub</span><span className="link-desc">Source Code</span></div>
-          </a>
-          <a href="#" className="link-item">
-            <div className="link-icon" style={{ background: '#20C976' }}><i className="fas fa-code"></i></div>
-            <div><span className="link-text">API Swagger</span><span className="link-desc">Tài liệu API</span></div>
-          </a>
-          <a href="#" className="link-item">
-            <div className="link-icon" style={{ background: '#A259FF' }}><i className="fab fa-figma"></i></div>
-            <div><span className="link-text">Figma UI</span><span className="link-desc">Thiết kế giao diện</span></div>
-          </a>
+    function getPages() {
+        const delta = 2; 
+        const range = [];
+        const left = Math.max(1, currentPage - delta);
+        const right = Math.min(safeTotalPages, currentPage + delta);
+
+        for (let i = left; i <= right; i++) {
+            range.push(i);
+        }
+
+        if (left > 2) range.unshift('...');
+        if (left > 1) range.unshift(1);
+
+        if (right < safeTotalPages - 1) range.push('...');
+        if (right < safeTotalPages) range.push(safeTotalPages);
+
+        return range;
+    }
+
+    return (
+        <div 
+            className="pagination" 
+            style={{ 
+                marginTop: '20px', 
+                marginBottom: '20px',
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                gap: '8px',              
+                flexWrap: 'wrap'         
+            }}
+        >
+            {/* Nút Previous */}
+            <button
+                className="page-btn"
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                style={{ 
+                    opacity: currentPage === 1 ? 0.4 : 1, 
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold' // In đậm icon/nút lùi
+                }}
+            >
+                <i className="fas fa-chevron-left"></i>
+            </button>
+
+            {/* Render các trang và dấu ... */}
+            {getPages().map((p, i) =>
+                p === '...' ? (
+                    <span 
+                        key={`ellipsis-${i}`} 
+                        className="page-btn" 
+                        style={{ 
+                            background: 'transparent', 
+                            border: 'none', 
+                            color: '#888',
+                            pointerEvents: 'none',
+                            padding: '8px 4px',
+                            fontWeight: 'bold' // In đậm dấu 3 chấm
+                        }}
+                    >
+                        ...
+                    </span>
+                ) : (
+                    <button
+                        key={p}
+                        onClick={() => onPageChange(p)}
+                        className={`page-btn ${p === currentPage ? 'active' : ''}`}
+                        style={{ fontWeight: 'bold' }} // In đậm các số trang
+                    >
+                        {p}
+                    </button>
+                )
+            )}
+
+            {/* Nút Next */}
+            <button
+                className="page-btn"
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === safeTotalPages}
+                style={{ 
+                    opacity: currentPage === safeTotalPages ? 0.4 : 1, 
+                    cursor: currentPage === safeTotalPages ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold' // In đậm icon/nút tiến
+                }}
+            >
+                <i className="fas fa-chevron-right"></i>
+            </button>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
-export default Profile;
+export default Pagination;
