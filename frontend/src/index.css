@@ -48,7 +48,7 @@ body { background-color: #F4F6F9; color: #333; margin: 0; }
 .chart-tab.active { background: white; color: #2D2185; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); font-weight: 600; transform: scale(1.05); }
 
 .device-list { display: flex; flex-direction: column; gap: 15px; }
-.device-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F8F9FE; border-radius: 20px; transition: 0.3s; border: 1px solid transparent; }
+.device-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #F8F9FE; border-radius: 20px; transition: 0.3s; border: 1px solid transparent; user-select: none;-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;-webkit-tap-highlight-color: transparent; }
 .device-item:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.03); border-color: #E5E7EB; }
 
 .device-info { display: flex; align-items: center; gap: 15px; }
@@ -90,8 +90,30 @@ input:checked + .toggle-slider:before { transform: translateX(28px); }
    3. TRANG DỮ LIỆU & LỊCH SỬ
    ========================================= */
 .filter-toolbar { display: flex; justify-content: flex-start; margin-bottom: 20px; gap: 15px; align-items: center; }
-.search-box { background: #F8F9FE; padding: 12px 20px; border-radius: 15px; display: flex; align-items: center; gap: 10px; width: 300px; border: 1px solid #E5E7EB; }
-.search-box input { border: none; outline: none; background: transparent; width: 100%; font-size: 14px; }
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: white; 
+  border: 1px solid #E5E7EB; /* Viền xám mờ */
+  border-radius: 20px; /* Bo góc tròn */
+  padding: 8px 16px;
+  width: 250px; /* Hoặc để chiều dài tuỳ ý bạn */
+  gap: 10px; /* Tạo khoảng cách giữa cái kính lúp và chữ */
+  cursor: text; /* Đổi chuột thành hình thanh gõ chữ khi lướt qua vùng trống */
+}
+
+/* 2. Định dạng cho ô nhập liệu bên trong */
+.search-box input {
+  flex: 1; /* QUAN TRỌNG NHẤT: Bắt thẻ input giãn ra chiếm trọn 100% không gian còn lại */
+  border: none;
+  outline: none;
+  background: transparent; /* Nền trong suốt để tiệp màu với khung ngoài */
+  padding: 0;
+  margin: 0;
+  color: #333;
+  width: 100%;
+  text-align: left
+}
 .filter-select { padding: 12px 20px; border-radius: 15px; border: 1px solid #E5E7EB; outline: none; background: #F8F9FE; cursor: pointer; }
 
 table { width: 100%; border-collapse: collapse; }

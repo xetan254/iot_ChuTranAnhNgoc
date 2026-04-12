@@ -72,7 +72,7 @@ function Dashboard() {
   const toggleDevice = async (deviceKey) => {
     if (loadingDevices[deviceKey]) return; 
 
-    const oldState = devices[deviceKey]; // Ghi nhớ trạng thái cũ
+    const oldState = devices[deviceKey]; 
     const newState = !oldState;
     const actionStr = newState ? 'ON' : 'OFF';
 
@@ -81,26 +81,77 @@ function Dashboard() {
     else if (deviceKey === 'light') { deviceId = 2; deviceCode = 'LED_2'; }
     else if (deviceKey === 'air') { deviceId = 3; deviceCode = 'LED_3'; }
 
-    // Chuyển nút sang trạng thái mới & bật loading spinner
+    // Chuyển nút sang trạng thái mới & bật loading spinner lập tức
     setDevices({ ...devices, [deviceKey]: newState });
     setLoadingDevices({ ...loadingDevices, [deviceKey]: true });
 
     try {
-      await axios.post('http://localhost:5000/api/control', {
+      // 1. Gửi lệnh điều khiển (BỎ AWAIT để không bị kẹt nếu backend treo 1 phút)
+      // Thêm timeout 5s để ngắt request nếu nó treo quá lâu
+      axios.post('http://localhost:5000/api/control', {
         deviceId: deviceId, deviceCode: deviceCode, action: actionStr
-      });
-      // Thành công thì tắt spinner
-      setLoadingDevices(prev => ({ ...prev, [deviceKey]: false }));
-    } catch (error) {
-      // THẤT BẠI HOẶC QUÁ 10S -> HOÀN TÁC LẠI TRẠNG THÁI CŨ
-      setLoadingDevices(prev => ({ ...prev, [deviceKey]: false }));
-      setDevices(prev => ({ ...prev, [deviceKey]: oldState })); 
-      
-      if (error.response && error.response.status === 408) {
-        alert("⚠️ Lệnh thất bại: Thiết bị không phản hồi. Đã hủy bỏ thao tác.");
-      } else {
-        alert("❌ Lỗi kết nối đến máy chủ.");
+      }, { timeout: 5000 }).catch(err => console.log("Lỗi POST lệnh:", err));
+
+      // 2. Polling kiểm tra database liên tục tối đa 10 giây
+      let statusChanged = false;
+      const maxRetries = 10; 
+      const delayMs = 1000;  
+
+      for (let i = 0; i < maxRetries; i++) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+
+        const res = await axios.get('http://localhost:5000/api/device-status');
+        const targetDevice = res.data.find(item => String(item.device_id) === String(deviceId));
+        
+        if (targetDevice) {
+          const dbIsOn = (targetDevice.action && targetDevice.action.toUpperCase() === 'ON') || 
+                         (targetDevice.status && targetDevice.status.toUpperCase() === 'ON');
+          
+          if (dbIsOn === newState) {
+            statusChanged = true;
+            break; 
+          }
+        }
       }
+
+      // Hết 10s, kiểm tra xem trạng thái đã đổi thành công chưa
+      if (statusChanged) {
+        setLoadingDevices(prev => ({ ...prev, [deviceKey]: false }));
+      } else {
+        throw new Error("TIMEOUT_10S"); // Chủ động ném lỗi nếu quá 10s không đổi
+      }
+
+   } catch (error) {
+      // 3. XỬ LÝ LỖI HOẶC QUÁ 10S: TRUY VẤN LẠI DB ĐỂ LẤY TRẠNG THÁI MỚI NHẤT
+      try {
+        const res = await axios.get('http://localhost:5000/api/device-status');
+        const targetDevice = res.data.find(item => String(item.device_id) === String(deviceId));
+        
+        let latestDbState = oldState; // Mặc định về trạng thái ban đầu
+        if (targetDevice) {
+          // Lấy chính xác trạng thái mới nhất đang lưu trong Database (chỉ ON hoặc OFF)
+          latestDbState = (targetDevice.action && targetDevice.action.toUpperCase() === 'ON') || 
+                          (targetDevice.status && targetDevice.status.toUpperCase() === 'ON');
+        }
+        
+        // Cập nhật giao diện theo trạng thái thực tế của DB
+        setDevices(prev => ({ ...prev, [deviceKey]: latestDbState })); 
+      } catch (dbError) {
+        // Nếu API sập không lấy được thì đành lùi về oldState
+        setDevices(prev => ({ ...prev, [deviceKey]: oldState })); 
+      }
+
+      // Tắt loading
+      setLoadingDevices(prev => ({ ...prev, [deviceKey]: false }));
+      
+      // SỬ DỤNG SETTIMEOUT ĐỂ DELAY ALERT, GIÚP GIAO DIỆN CẬP NHẬT TRƯỚC
+      setTimeout(() => {
+        if (error.message === "TIMEOUT_10S") {
+          alert("⚠️ Lệnh thất bại: Không nhận được phản hồi sau 10s. Thiết bị đã trở về trạng thái hiện tại.");
+        } else {
+          alert("❌ Lỗi kết nối đến máy chủ.");
+        }
+      }, 400); // Trễ 100ms là đủ để React render lại UI
     }
   };
 
