@@ -5,11 +5,8 @@ const sequelize = require('./config/Database');
 const { mqttClient, mqttEvents, getLastSeen } = require('./config/Mqtt');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
-
-// Nạp các Router chuyên biệt (Modular Routes)
-const ActionRoutes = require('./routes/ActionRoutes');
-const DeviceRoutes = require('./routes/DeviceRoutes');
-const SensorDataRoutes = require('./routes/SensorDataRoutes');
+const ActionController = require('./controllers/ActionController');
+const SensorController = require('./controllers/SensorController');
 
 require('dotenv').config();
 
@@ -57,6 +54,18 @@ console.log("-----------------------------------------");
 // CÁCH MỚI: Tách rời việc phục vụ file tĩnh và render UI
 app.use('/api-docs', swaggerUi.serve);
 app.get('/api-docs', swaggerUi.setup(swaggerDocument));
+
+// Đăng ký các API chính cho frontend
+app.get('/api/device-status', ActionController.getDeviceStatus);
+app.get('/api/sensor-data', SensorController.getSensorData);
+app.get('/api/chart-data', SensorController.getChartData);
+app.get('/api/action-history', ActionController.getActionHistory);
+app.post('/api/control', (req, res) =>
+    ActionController.controlDevice(req, res, mqttClient, mqttEvents)
+);
+app.get('/api/health', (req, res) =>
+    SensorController.getHealth(req, res, getLastSeen())
+);
 
 // Thêm một API test nghiệm thu để chắc chắn 100% server này đang chạy
 app.get('/ping', (req, res) => {

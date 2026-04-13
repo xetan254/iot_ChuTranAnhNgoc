@@ -30,10 +30,10 @@ function Pagination({ page, onPageChange, totalPages = 1 }) {
                 marginTop: '20px', 
                 marginBottom: '20px',
                 display: 'flex', 
-                justifyContent: 'center', // Lệnh này giúp căn giữa toàn bộ thanh phân trang
+                justifyContent: 'center',
                 alignItems: 'center',
-                gap: '8px',               // Tạo khoảng cách đều giữa các nút
-                flexWrap: 'wrap'          // Tránh bị tràn màn hình trên điện thoại
+                gap: '8px',              
+                flexWrap: 'wrap'       
             }}
         >
             {/* Nút Previous */}

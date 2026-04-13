@@ -26,7 +26,6 @@ function Dashboard() {
         const statusMap = { ac: false, light: false, air: false };
         
         res.data.forEach(item => {
-          // CHỈ KIỂM TRA STATUS THỰC TẾ (Thành công cuối cùng)
           const isON = item.status && item.status.toUpperCase() === 'ON';
           
           if (String(item.device_id) === '1') statusMap.ac = isON;
@@ -86,7 +85,7 @@ function Dashboard() {
     setLoadingDevices({ ...loadingDevices, [deviceKey]: true });
 
     try {
-      // 1. Gửi lệnh điều khiển (BỎ AWAIT để không bị kẹt nếu backend treo 1 phút)
+      // 1. Gửi lệnh điều khiển
       axios.post('http://localhost:5000/api/control', {
         deviceId: deviceId, deviceCode: deviceCode, action: actionStr
       }, { timeout: 5000 }).catch(err => console.log("Lỗi POST lệnh:", err));
@@ -103,7 +102,6 @@ function Dashboard() {
         const targetDevice = res.data.find(item => String(item.device_id) === String(deviceId));
         
         if (targetDevice) {
-          // CHỈ KIỂM TRA STATUS THỰC TẾ
           const dbIsOn = targetDevice.status && targetDevice.status.toUpperCase() === 'ON';
           
           if (dbIsOn === newState) {
@@ -113,15 +111,14 @@ function Dashboard() {
         }
       }
 
-      // Hết 10s, kiểm tra xem trạng thái đã đổi thành công chưa
       if (statusChanged) {
         setLoadingDevices(prev => ({ ...prev, [deviceKey]: false }));
       } else {
-        throw new Error("TIMEOUT_10S"); // Chủ động ném lỗi nếu quá 10s không đổi
+        throw new Error("TIMEOUT_10S"); 
       }
 
    } catch (error) {
-      // 3. XỬ LÝ LỖI HOẶC QUÁ 10S: TRUY VẤN LẠI DB ĐỂ LẤY TRẠNG THÁI MỚI NHẤT
+      // 3. XỬ LÝ LỖI 
       try {
         const res = await axios.get('http://localhost:5000/api/device-status');
         const targetDevice = res.data.find(item => String(item.device_id) === String(deviceId));
@@ -141,9 +138,9 @@ function Dashboard() {
       
       setTimeout(() => {
         if (error.message === "TIMEOUT_10S") {
-          alert("⚠️ Lệnh thất bại: Không nhận được phản hồi sau 10s. Thiết bị đã trở về trạng thái hiện tại.");
+          alert("Lệnh thất bại. Thiết bị đã trở về trạng thái cũ.");
         } else {
-          alert("❌ Lỗi kết nối đến máy chủ.");
+          alert("Lỗi kết nối đến máy chủ.");
         }
       }, 400); 
     }
