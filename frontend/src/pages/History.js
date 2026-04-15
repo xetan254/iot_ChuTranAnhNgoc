@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Thêm useState, useEffect
 import SearchBox from '../components/shared/SearchBox';
 import FilterSelect from '../components/shared/FilterSelect';
 import DataTable from '../components/shared/DataTable';
@@ -16,11 +16,35 @@ function History() {
     totalPages,
     searchTerm,
     setSearchTerm,
-    filterValue,
+    filterValue, // Giá trị filter status cũ
     setFilterValue,
+    deviceFilter,
+    setDeviceFilter,
+    timeSort,
+    setTimeSort,
     sortConfig,
     handleSort,
   } = useAction();
+
+  // State lưu danh sách thiết bị để render dropdown
+  const [devices, setDevices] = useState([]);
+
+  // Gọi API lấy danh sách thiết bị khi load trang
+  useEffect(() => {
+    // Thay đổi URL theo đúng route API backend của bạn
+    fetch('http://localhost:5000/api/devices') // Sửa port/domain nếu cần
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+            const options = data.map(device => ({
+                value: device.name, 
+                label: device.name
+            }));
+            setDevices([{ value: 'all', label: 'Tất cả thiết bị' }, ...options]);
+        }
+      })
+      .catch(err => console.error("Lỗi lấy danh sách thiết bị:", err));
+  }, []);
 
   const columns = [
     { key: 'id', label: 'ID', render: (item) => `#${item.id}` },
@@ -40,19 +64,37 @@ function History() {
     { value: 'failed', label: 'Thất bại (Failed)' },
   ];
 
+  const timeSortOptions = [
+    { value: 'desc', label: 'Mới nhất trước' },
+    { value: 'asc', label: 'Cũ nhất trước' }
+  ];
+
   return (
     <div className="card">
-      <div className="filter-toolbar" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+      <div className="filter-toolbar" style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '15px', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
         <SearchBox 
           placeholder="Tìm theo ID, tên thiết bị..." 
           value={searchTerm} 
           onChange={setSearchTerm} 
         />
+        
         <FilterSelect 
-          label="Lọc trạng thái" 
+          label="Tên Thiết bị" 
+          value={deviceFilter} 
+          onChange={setDeviceFilter} 
+          options={devices.length > 0 ? devices : [{ value: 'all', label: 'Đang tải...' }]} 
+        />
+        <FilterSelect 
+          label="Trạng thái" 
           value={filterValue} 
           onChange={setFilterValue} 
           options={statusOptions} 
+        />
+        <FilterSelect
+          label="Thời gian"
+          value={timeSort}
+          onChange={setTimeSort}
+          options={timeSortOptions}
         />
       </div>
 

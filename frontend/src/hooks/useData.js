@@ -1,45 +1,76 @@
-import axios from 'axios';
-import { useDataTableBase } from './useDataTableBase';
-import { formatDate } from '../utils/dateUtils';
+import { useState, useEffect } from 'react';
 
-export function useData() {
-  const fetchFn = async (offset, limit) => {
-    const response = await axios.get(`http://localhost:5000/api/sensor-data?limit=${limit}&offset=${offset}`);
-    const payload = response.data;
+export const useData = () => {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    
+    // Các state phục vụ tìm kiếm và lọc
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterValue, setFilterValue] = useState('all'); // Lọc theo Loại (Nhiệt độ, Độ ẩm...)
+    const [sensorFilter, setSensorFilter] = useState('all'); // Lọc theo Tên cảm biến
 
-    if (Array.isArray(payload)) {
-      return {
-        data: payload,
-        totalPages: payload.length < limit ? Math.max(1, Math.floor(offset / limit) + 1) : Math.floor(offset / limit) + 2
-      };
-    }
+    // Các state phục vụ sắp xếp
+    const [timeSort, setTimeSort] = useState('desc'); // Thời gian: Mới nhất (desc), Cũ nhất (asc)
+    const [valueSort, setValueSort] = useState('none'); // Giá trị: none, asc (tăng), desc (giảm)
+    
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // Đưa tất cả biến lọc và sắp xếp vào URL để gửi xuống Backend
+            let url = `http://localhost:5000/api/sensor-data?page=${page}&limit=10`;
+            if (searchTerm) url += `&search=${searchTerm}`;
+            if (filterValue !== 'all') url += `&type=${filterValue}`;
+            if (sensorFilter !== 'all') url += `&sensorName=${sensorFilter}`;
+            
+            // Tham số sắp xếp
+            url += `&timeSort=${timeSort}`;
+            if (valueSort !== 'none') url += `&valueSort=${valueSort}`;
+
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            setData(result.data || []);
+            setTotalPages(result.totalPages || 1);
+        } catch (error) {
+            console.error("Lỗi lấy dữ liệu:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Khi bất kỳ filter/sort nào thay đổi, gọi lại API và reset về trang 1
+    useEffect(() => {
+        setPage(1); 
+    }, [searchTerm, filterValue, sensorFilter, timeSort, valueSort]);
+
+    // Lắng nghe sự thay đổi để fetch data
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            fetchData();
+        }, 300); // Thêm độ trễ 300ms để tránh gọi API liên tục khi gõ phím
+        return () => clearTimeout(delayDebounce);
+    }, [page, searchTerm, filterValue, sensorFilter, timeSort, valueSort]);
+
+    const handleSort = (key) => {
+        // Tương thích với chuẩn DataTable hiện tại
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
 
     return {
-      data: payload.data || [],
-      totalPages: payload.totalPages || 1
+        data, loading, page, setPage, totalPages,
+        searchTerm, setSearchTerm,
+        filterValue, setFilterValue,
+        sensorFilter, setSensorFilter,
+        timeSort, setTimeSort,
+        valueSort, setValueSort,
+        sortConfig, handleSort
     };
-  };
-
-  const filterFn = (item, searchTerm, typeFilter) => {
-    // 1. Filter by Data Type
-    const matchType = typeFilter === 'all' || item.type.toLowerCase() === typeFilter.toLowerCase();
-    
-    // 2. Filter by Keyword
-    const term = searchTerm.toLowerCase();
-    const matchSearch = searchTerm === '' || (
-      String(item.id).includes(term) ||
-      item.sensor_name.toLowerCase().includes(term) ||
-      item.type.toLowerCase().includes(term) ||
-      String(item.value).includes(term) ||
-      formatDate(item.measured_at).toLowerCase().includes(term)
-    );
-
-    return matchType && matchSearch;
-  };
-
-  return useDataTableBase({ 
-    initialSort: { key: 'measured_at', direction: 'desc' }, 
-    fetchFn, 
-    filterFn 
-  });
-}
+};

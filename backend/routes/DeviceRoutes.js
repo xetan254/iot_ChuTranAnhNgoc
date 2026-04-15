@@ -5,8 +5,7 @@ const ActionController = require('../controllers/ActionController');
 // Định nghĩa các route liên quan đến trạng thái thiết bị
 module.exports = () => {
     
-    // API Lấy trạng thái ON/OFF hiện tại của các thiết bị
     router.get('/device-status', ActionController.getDeviceStatus);
-
+    router.get('/devices', ActionController.getAllDevices);
     return router;
 };

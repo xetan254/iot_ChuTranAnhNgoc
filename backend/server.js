@@ -60,6 +60,8 @@ app.get('/api/device-status', ActionController.getDeviceStatus);
 app.get('/api/sensor-data', SensorController.getSensorData);
 app.get('/api/chart-data', SensorController.getChartData);
 app.get('/api/action-history', ActionController.getActionHistory);
+app.get('/api/sensors', SensorController.getAllSensors); 
+app.get('/api/devices', ActionController.getAllDevices);
 app.post('/api/control', (req, res) =>
     ActionController.controlDevice(req, res, mqttClient, mqttEvents)
 );

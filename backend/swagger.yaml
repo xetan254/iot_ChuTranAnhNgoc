@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: IoT System API Documentation
+  description: Tài liệu API cho hệ thống IoT bao gồm quản lý thiết bị và dữ liệu cảm biến. Có tích hợp mô tả Database Schema.
+  version: 1.0.0
+  contact:
+    name: Chu Tran Anh Ngoc
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local Server
+
+tags:
+  - name: Device
+    description: Các API liên quan đến trạng thái thiết bị
+  - name: Action
+    description: Các API liên quan đến việc điều khiển và lịch sử bật/tắt thiết bị
+  - name: Sensor
+    description: Các API liên quan đến dữ liệu cảm biến
+
+paths:
+  /device-status:
+    get:
+      summary: Lấy trạng thái thiết bị
+      description: API trả về trạng thái ON/OFF hiện tại của các thiết bị.
+      tags:
+        - Device
+      responses:
+        '200':
+          description: Lấy trạng thái thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Action'
+
+  /control:
+    post:
+      summary: Điều khiển thiết bị (Bật/Tắt)
+      description: Gửi lệnh để bật hoặc tắt thiết bị (Điều hòa, Đèn, Máy lọc khí...).
+      tags:
+        - Action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deviceId:
+                  type: integer
+                  description: ID của thiết bị
+                  example: 1
+                deviceCode:
+                  type: string
+                  description: Mã code của thiết bị
+                  example: "LED_1"
+                action:
+                  type: string
+                  description: Lệnh điều khiển (ON hoặc OFF)
+                  example: "ON"
+      responses:
+        '200':
+          description: Gửi lệnh điều khiển thành công
+
+  /action-history:
+    get:
+      summary: Lấy lịch sử điều khiển thiết bị
+      description: Trả về danh sách lịch sử các lần bật/tắt thiết bị, có hỗ trợ phân trang.
+      tags:
+        - Action
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Số trang hiện tại
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Số lượng bản ghi trên mỗi trang
+      responses:
+        '200':
+          description: Lấy lịch sử thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Action'
+
+  /sensor-data:
+    get:
+      summary: Lấy lịch sử dữ liệu cảm biến
+      description: API Lấy lịch sử dữ liệu cảm biến, có hỗ trợ phân trang.
+      tags:
+        - Sensor
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Số trang hiện tại
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Số lượng bản ghi trên mỗi trang
+      responses:
+        '200':
+          description: Lấy dữ liệu thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SensorData'
+
+  /chart-data:
+    get:
+      summary: Lấy dữ liệu biểu đồ
+      description: Trả về tập dữ liệu phù hợp để render biểu đồ trên Frontend.
+      tags:
+        - Sensor
+      responses:
+        '200':
+          description: Lấy dữ liệu biểu đồ thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SensorData'
+
+# =========================================================
+# KHAI BÁO SCHEMA (Ánh xạ từ SQL Database)
+# =========================================================
+components:
+  schemas:
+    Sensor:
+      type: object
+      description: Cấu trúc bảng sensor
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "DHT11 (Nhiệt độ - Độ ẩm)"
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-10-01T12:00:00Z"
+
+    SensorData:
+      type: object
+      description: Cấu trúc bảng sensor_data
+      properties:
+        id:
+          type: integer
+          example: 1542
+        sensor_id:
+          type: integer
+          example: 1
+        type:
+          type: string
+          example: "Nhiệt độ"
+        value:
+          type: number
+          format: float
+          example: 26.5
+        measured_at:
+          type: string
+          format: date-time
+          example: "2023-10-01T12:05:00Z"
+
+    Device:
+      type: object
+      description: Cấu trúc bảng device
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Điều Hòa"
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-10-01T12:00:00Z"
+
+    Action:
+      type: object
+      description: Cấu trúc bảng actions (Lịch sử hành động)
+      properties:
+        id:
+          type: integer
+          example: 89
+        device_id:
+          type: integer
+          example: 1
+        action:
+          type: string
+          example: "ON"
+        status:
+          type: string
+          example: "Thành công"
+        interacted_at:
+          type: string
+          format: date-time
+          example: "2023-10-01T14:30:00Z"
