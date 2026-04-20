@@ -12,6 +12,7 @@ module.exports = (mqttClient, mqttEvents) => {
     router.post('/control', (req, res) => 
         ActionController.controlDevice(req, res, mqttClient, mqttEvents)
     );
+    router.get('/actions/stats/daily', ActionController.getDailyStats);
 
     return router;
 };

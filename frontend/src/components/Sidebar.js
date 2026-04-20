@@ -25,6 +25,12 @@ function Sidebar() {
           </NavLink>
         </li>
         <li>
+          <NavLink to="/device-stats" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+              <i className="fas fa-chart-bar"></i>
+              <span>Thống kê Thiết bị</span>
+          </NavLink>
+        </li>
+        <li>
           <NavLink to="/profile" className={({ isActive }) => isActive ? "active" : ""}>
             <i className="fas fa-user"></i> Hồ Sơ
           </NavLink>

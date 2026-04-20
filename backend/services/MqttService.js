@@ -32,7 +32,7 @@ const MqttService = {
                 mqttEvents.emit(`feedback_${feedback.device}`, feedback.status);
 
                 // Cập nhật lại bảng lịch sử (Status 'waiting' -> 'ON'/'OFF')
-                let deviceId = feedback.device === 'LED_1' ? 1 : (feedback.device === 'LED_2' ? 2 : 3);
+                let deviceId = feedback.device === 'LED_1' ? 1 : (feedback.device === 'LED_2' ? 2 : (feedback.device === 'LED_3' ? 3 : (feedback.device === 'LED_4' ? 4 : 5)));
                 
                 // Tìm hành động 'waiting' gần nhất để cập nhật trạng thái thực tế
                 const lastWaitingAction = await Action.findOne({
@@ -58,7 +58,9 @@ const MqttService = {
                 const deviceList = [
                     { id: 1, code: 'LED_1' }, 
                     { id: 2, code: 'LED_2' }, 
-                    { id: 3, code: 'LED_3' }
+                    { id: 3, code: 'LED_3' },
+                    { id: 4, code: 'LED_4' },
+                    { id: 5, code: 'LED_5' },
                 ];
                 
                 for (const dev of deviceList) {

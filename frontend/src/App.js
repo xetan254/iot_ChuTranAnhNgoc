@@ -5,7 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Data from './pages/Data';
 import History from './pages/History';
 import Profile from './pages/Profile';
-
+import DeviceStats from './pages/DeviceStats';
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 
 function App() {
@@ -20,6 +20,7 @@ function App() {
             <Route path="/data" element={<Data />} />
             <Route path="/history" element={<History />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/device-stats" element={<DeviceStats />} />
           </Routes>
         </main>
       </div>

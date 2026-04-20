@@ -8,8 +8,8 @@ import { Line } from 'react-chartjs-2';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
 function Dashboard() {
-  const [devices, setDevices] = useState({ ac: false, light: false, air: false });
-  const [loadingDevices, setLoadingDevices] = useState({ ac: false, light: false, air: false });
+  const [devices, setDevices] = useState({ ac: false, light: false, air: false, light2: false, ac2: false });
+  const [loadingDevices, setLoadingDevices] = useState({ ac: false, light: false, air: false, light2: false, ac2: false });
   const [latestData, setLatestData] = useState({ temp: '--', humidity: '--', light: '--', air: '--' });
   const [activeChartTab, setActiveChartTab] = useState('temp');
   const [chartDataState, setChartDataState] = useState({
@@ -23,7 +23,7 @@ function Dashboard() {
     const fetchInitialStatus = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/device-status');
-        const statusMap = { ac: false, light: false, air: false };
+        const statusMap = { ac: false, light: false, air: false, light2: false, ac2: false };
         
         res.data.forEach(item => {
           const isON = item.status && item.status.toUpperCase() === 'ON';
@@ -31,6 +31,8 @@ function Dashboard() {
           if (String(item.device_id) === '1') statusMap.ac = isON;
           if (String(item.device_id) === '2') statusMap.light = isON;
           if (String(item.device_id) === '3') statusMap.air = isON;
+          if (String(item.device_id) === '4') statusMap.light2 = isON;
+          if (String(item.device_id) === '5') statusMap.ac2 = isON;
         });
         setDevices(statusMap);
       } catch (e) { console.error("Lỗi đồng bộ trạng thái:", e); }
@@ -79,6 +81,8 @@ function Dashboard() {
     if (deviceKey === 'ac') { deviceId = 1; deviceCode = 'LED_1'; }
     else if (deviceKey === 'light') { deviceId = 2; deviceCode = 'LED_2'; }
     else if (deviceKey === 'air') { deviceId = 3; deviceCode = 'LED_3'; }
+    else if (deviceKey === 'light2') { deviceId = 4; deviceCode = 'LED_4'; }
+    else if (deviceKey === 'ac2') { deviceId = 5; deviceCode = 'LED_5'; }
 
     // Chuyển nút sang trạng thái mới & bật loading spinner lập tức
     setDevices({ ...devices, [deviceKey]: newState });
@@ -267,6 +271,45 @@ function Dashboard() {
                 {loadingDevices.air && <i className="fas fa-spinner fa-spin" style={{ color: '#FFAA00', fontSize: '18px' }}></i>}
                 <label className="toggle-switch" style={{ opacity: loadingDevices.air ? 0.5 : 1, cursor: loadingDevices.air ? 'not-allowed' : 'pointer' }}>
                   <input type="checkbox" checked={devices.air} onChange={() => toggleDevice('air')} disabled={loadingDevices.air} />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            {/* THIẾT BỊ HỆ THỐNG ĐÈN 2 */}
+            <div className={`device-item ${devices.light2 && !loadingDevices.light2 ? 'active-light' : ''}`}>
+              <div className="device-info">
+                <div className="device-icon-wrapper"><i className="fas fa-lightbulb"></i></div>
+                <div>
+                  <div className="device-name">Hệ Thống Đèn 2</div>
+                  <div className="device-status" style={{ color: loadingDevices.light2 ? '#FFAA00' : (devices.light2 ? '#20C976' : '#888') }}>
+                    {loadingDevices.light2 ? 'Đang xử lý...' : (devices.light2 ? 'Đang hoạt động' : 'Đang tắt')}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {loadingDevices.light2 && <i className="fas fa-spinner fa-spin" style={{ color: '#FFAA00', fontSize: '18px' }}></i>}
+                <label className="toggle-switch" style={{ opacity: loadingDevices.light2 ? 0.5 : 1, cursor: loadingDevices.light2 ? 'not-allowed' : 'pointer' }}>
+                  <input type="checkbox" checked={devices.light2} onChange={() => toggleDevice('light2')} disabled={loadingDevices.light2} />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            {/* THIẾT BỊ ĐIỀU HÒA 2 */}
+            <div className={`device-item ${devices.ac2 && !loadingDevices.ac2 ? 'active-ac' : ''}`}>
+              <div className="device-info">
+                <div className="device-icon-wrapper"><i className="fas fa-fan"></i></div>
+                <div>
+                  <div className="device-name">Điều Hòa 2</div>
+                  <div className="device-status" style={{ color: loadingDevices.ac2 ? '#FFAA00' : (devices.ac2 ? '#20C976' : '#888') }}>
+                    {loadingDevices.ac2 ? 'Đang xử lý...' : (devices.ac2 ? 'Đang hoạt động' : 'Đang tắt')}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {loadingDevices.ac2 && <i className="fas fa-spinner fa-spin" style={{ color: '#FFAA00', fontSize: '18px' }}></i>}
+                <label className="toggle-switch" style={{ opacity: loadingDevices.ac2 ? 0.5 : 1, cursor: loadingDevices.ac2 ? 'not-allowed' : 'pointer' }}>
+                  <input type="checkbox" checked={devices.ac2} onChange={() => toggleDevice('ac2')} disabled={loadingDevices.ac2} />
                   <span className="toggle-slider"></span>
                 </label>
               </div>

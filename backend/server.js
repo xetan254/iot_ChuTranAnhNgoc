@@ -68,8 +68,7 @@ app.post('/api/control', (req, res) =>
 app.get('/api/health', (req, res) =>
     SensorController.getHealth(req, res, getLastSeen())
 );
-
-// Thêm một API test nghiệm thu để chắc chắn 100% server này đang chạy
+app.get('/api/actions/stats/daily', ActionController.getDailyStats);
 app.get('/ping', (req, res) => {
     res.send("✅ SERVER BACKEND ĐANG CHẠY RẤT TỐT NHÉ!");
 });
